@@ -1,56 +1,236 @@
+let enemy, player, floor, roof, leftwall, rightwall, balls, enemyShots, speedUp,sizeUp,timeUp,timeStop,guardian,guardianPowerUp,guardianCount, walls, sword,swinger, swordHitBox;
 
-let player;
-let blobs = [];
-let score = 0;
-let minScore = 0;
+let gameLoop = false;
+
+let playerInvincible = false;
+
+userAccel = 0.1;
+drag = 1;
+totalMillis = 0;
+milliChecker = 0;
+lastShot = 0;
+baseSpeed = 1;
+shotTime = 200;
+shotSpeed = 0;
+shotSize = 20;
+playerAlive = true;
+
+enemyMilliChecker = 0;
+enemyMilliCheckerHealth = 0;
+enemyMilliCheckerBurst = 0;
+enemyMilliCheckerSnipe = 0;
+enemyRPM = 500;
+enemyShotSize = 30;
+enemyShotSpeed = 0;
+enemyHealth = 50;
+enemyHealthBarWidth = 200;
+enemyAlive = true;
+lastEnemyShot = 0;
+lastEnemyHealthShot = 0;
+lastEnemyBurstShot = 0;
+lastEnemySnipeShot = 0;
+
+maxEnemyHealth = 50;
+maxHealthBarWidth = 1200;
+
+dashChecker = 0;
+lastDash = 0;
+dashDistance = 100;
+hoshiplatinum = true;
+enemySpeed = 5;
+guardianCount = 0;
+timeCounter =0;
+lastStop = 0;
+stopInterval = 2000;
+swingerAngle = 0;
+swingTime = 0;
+
+weapon = "balls";
 
 function setup() {
-  createCanvas(800, 250);
-  player = new Player();
+	createCanvas(windowWidth, windowHeight);
+	background(40);
+	
+	frameRate(90);
+	
+	noStroke();
+	swinger = new Sprite(-200,200,65,15,'n')
+	enemyShots = new Group();
+	enemyShots.color = color(255, 100, 100);
+	enemyShots.stroke = color(255,100,100);
+	enemyShots.layer = 2;
+	
+	enemyHealthShots = new Group();
+	enemyHealthShots.color = color(255, 100, 200);
+	enemyHealthShots.stroke = color(255,100,200);
+	enemyHealthShots.layer = 1;
+	
+	balls = new Group();
+	balls.color = 255;
+	
+	push();
+	noStroke();
+	floor = new Sprite();
+	floor.y = windowHeight;
+	floor.w = windowWidth;
+	floor.h = 5;
+	floor.collider = "static";
+	floor.color = 255;
+	
+	roof = new Sprite();
+	roof.y = 0;
+	roof.w = windowWidth;
+	roof.h = 5;
+	roof.collider = "static";
+	roof.color = 255;
+	
+	leftwall = new Sprite();
+	leftwall.x = 0;
+	leftwall.y = windowHeight/2;
+	leftwall.w = 5;
+	leftwall.h = windowHeight;
+	leftwall.collider = "static";
+	leftwall.color = 255;
+	
+	rightwall = new Sprite();
+	rightwall.x = windowWidth;
+	rightwall.y = windowHeight/2;
+	rightwall.w = 5;
+	rightwall.h = windowHeight;
+	rightwall.collider = "static";
+	rightwall.color = 255;
+	pop();
 }
 
-function keyPressed() {
-  if (key == 'w') {
-    player.jump();
-  }
+function restart() {
+	userAccel = 0.5;
+	drag = 0.2;
+	totalMillis = 0;
+	milliChecker = 0;
+	lastShot = 0;
+	baseSpeed = 1;
+	shotSpeed = windowWidth/96;
+	shotSize = windowWidth/72;
+	playerAlive = true;
+
+	enemyMilliChecker = 0;
+	enemyMilliCheckerHealth = 0;
+	enemyMilliCheckerBurst = 0;
+	enemyMilliCheckerSnipe = 0;
+	enemyHealth = 50;
+	enemyAlive = true;
+	enemyShotSize = windowWidth/48;
+	enemyShotSpeed = windowWidth/120;
+	lastEnemyShot = 0;
+	lastEnemyHealthShot = 0;
+	lastEnemyBurstShot = 0;
+	lastEnemySnipeShot = 0;
+	
+	dashChecker = 0;
+	lastDash = 0;
+	dashDistance = 100;
+	hoshiplatinum = true;
+	enemySpeed = 5;
+	guardianCount = 0;
+	timeCounter =0;
+	lastStop = 0;
+	stopInterval = 2000;
+	swingerAngle = 0;
+	swingTime = 0;
+
+	weapon = "sword";
+		if(swordHitBox)
+		{
+			swordHitBox.remove();
+		}
+	swordHitBox = new Sprite(-200,-200,80,75, 'n');
+	swordHitBox.stroke = 40
+	swordHitBox.color =40
+
+	guardians = new Group();
+	guardians.diameter = 10;
+	speedUp = new Sprite(-400,400,50,50, "none");
+	sizeUp = new Sprite(-500,400,50,50, "none");
+	timeUp = new Sprite(-600,400,50,50, "none");
+	timeStop = new Sprite(-700,400,50,50, "none");
+	lengthUp
+		= new Sprite(-400,400,50,50, "none");
+	guardianPowerUp = new Sprite(-800,400,50,50, "none");
+	guardian = new Sprite(0,0,0,0, "none");
+	if(sword)
+		{
+	sword.remove();
+		}
+	if(swinger)
+		{
+			swinger.remove();
+		}
+
+	spawnSword();
+	swinger.offset.x = (swinger.width*0.5);
+	
+	player = new Sprite(windowWidth/2,windowHeight/2,windowWidth/48,windowWidth/48);
+	player.color = 40;
+	
+	leftSide = random(100,windowWidth/4);
+	rightSide = random(windowWidth/2 + 200, windowWidth);
+	spawnLocations = [];
+
+	spawnLocations.push(leftSide);
+	spawnLocations.push(rightSide);
+
+	spawnLocation = random(spawnLocations);
+	
+	enemy = new Sprite(spawnLocation,random(0,windowHeight-100),windowWidth/14, windowWidth/14)
+	enemy.color = 40;
+	
+	enemyHealthBarBorder = new Sprite(windowWidth/2,40, windowWidth-236, 20, "none");
+	enemyHealthBarBorder.color = 40;
+	enemyHealthBarBorder.stroke = 255;
+	enemyHealthBarBorder.layer = 1;
+	
+	enemyHealthBar = new Sprite(windowWidth/2, 40, windowWidth-240, 16, "none");
+	enemyHealthBar.color = color(255, 100, 100);
+	enemyHealthBar.stroke = color(255,100,100);
+	enemyHealthBar.layer = 2;
 }
 
 function draw() {
+	if (gameLoop === false) {
+	
+		menu();
+	}
+	
+	if (gameLoop === true) {
+		cursor(CROSS);
+		
+		dash();
+		shotSpeedUp();
+		shotTimeDown();
+		shotSizeUp();
+		playerMovement();
+		timeStoping();
+		guardianUP();
+		swordLengthUp();
+		
+		if (weapon == "sword")
+			{
+		swordBehavior();
+			}
+		if (weapon == "balls")
+			{
+				shootBall();
+			}
+		
+		playerMovement();
 
-  background(220);
+		enemyBehavior();
 
+		stroke(255);
+		strokeWeight(2);
 
+		player.rotateTowards(mouse, 0.8, 0);
 
-  score += .05;
-  fill(0, 102, 153);
-
-  textSize(30);
-  text(round(score), 10, 32);
-
-  player.show();
-  player.move();
-
-  if (random(1) < 0.03) {
-    if (score > minScore) {
-      blobs.push(new Blob());
-      minScore = score + 2 + random(1);
-    }
-  }
-
-  for (blob of blobs) {
-    blob.setSpeed(8 + sqrt(score) / 5);
-    blob.move();
-    blob.show();
-
-    if (player.hits(blob)) {
-      print("GAME OVER");
-      noLoop();
-    }
-
-    if (blob.getX() < -50) {
-      blobs.shift();
-      print("Removed");
-    }
-  }
-
+		clear();
+	}
 }
