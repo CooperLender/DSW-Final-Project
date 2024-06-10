@@ -1,4 +1,4 @@
-let enemy, player, floor, roof, leftwall, rightwall, balls, enemyShots, speedUp,sizeUp,timeUp,timeStop,guardian,guardianPowerUp,guardianCount, walls, sword,swinger, swordHitBox;
+let enemy, player, floor, roof, leftwall, rightwall, balls, enemyShots, speedUp,sizeUp,timeUp,timeStop,guardian,guardianPowerUp,guardianCount, walls, sword,swinger, swordHitBox, ballPowerUps, swordPowerUps,lasers;
 
 let gameLoop = false;
 
@@ -10,11 +10,13 @@ totalMillis = 0;
 milliChecker = 0;
 lastShot = 0;
 baseSpeed = 1;
-shotTime = 200;
+shotTime = 200; //200
 shotSpeed = 0;
 shotSize = 20;
 playerAlive = true;
 
+laserMilliChecker =0;
+laserLastShot =0;
 enemyMilliChecker = 0;
 enemyMilliCheckerHealth = 0;
 enemyMilliCheckerBurst = 0;
@@ -54,7 +56,7 @@ function setup() {
 	frameRate(90);
 	
 	noStroke();
-	swinger = new Sprite(-200,200,65,15,'n')
+	
 	enemyShots = new Group();
 	enemyShots.color = color(255, 100, 100);
 	enemyShots.stroke = color(255,100,100);
@@ -67,6 +69,7 @@ function setup() {
 	
 	balls = new Group();
 	balls.color = 255;
+	lasers = new Group();
 	
 	push();
 	noStroke();
@@ -138,7 +141,7 @@ function restart() {
 	swingerAngle = 0;
 	swingTime = 0;
 
-	weapon = "sword";
+	weapon = "laser";
 		if(swordHitBox)
 		{
 			swordHitBox.remove();
@@ -153,8 +156,7 @@ function restart() {
 	sizeUp = new Sprite(-500,400,50,50, "none");
 	timeUp = new Sprite(-600,400,50,50, "none");
 	timeStop = new Sprite(-700,400,50,50, "none");
-	lengthUp
-		= new Sprite(-400,400,50,50, "none");
+	lengthUp= new Sprite(-400,400,50,50, "none");
 	guardianPowerUp = new Sprite(-800,400,50,50, "none");
 	guardian = new Sprite(0,0,0,0, "none");
 	if(sword)
@@ -165,7 +167,8 @@ function restart() {
 		{
 			swinger.remove();
 		}
-
+	ballPowerUps= [speedUp,sizeUp,timeUp, guardianPowerUp];
+	swordPowerUps = [lengthUp, guardianPowerUp];
 	spawnSword();
 	swinger.offset.x = (swinger.width*0.5);
 	
@@ -220,6 +223,10 @@ function draw() {
 		if (weapon == "balls")
 			{
 				shootBall();
+			}
+		if (weapon == "laser")
+			{
+				shootLaser();
 			}
 		
 		playerMovement();

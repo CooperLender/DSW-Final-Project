@@ -12,11 +12,18 @@ function enemyBehavior() {
 			enemyAlive = false;
 			if(weapon == 'sword')
 				{
-					lengthUp.x = 200;
+
+					
+					
+					swordPowerUps[0].x = 200;
+					
 				}
 			if(weapon == 'balls')
 				{
-					speedUp.x = 200;
+					m=0;
+					r= Math.random()*(ballPowerUps.length-1);
+					r = Math.round(r);
+					ballPowerUps[r].x =200;
 				}
 		}
 		
@@ -137,6 +144,11 @@ function enemyBehavior() {
 			enemyHealthBar.width = maxHealthBarWidth;
 			enemyHealthBar.x = windowWidth/2;
 		}
+		else
+			{
+				enemyHealthBar.width = enemyHealthBarWidth/(50/enemyHealth);
+				enemyHealthBar.x = 180;
+			}
 		
 		if (player.overlaps(enemy)) {
 			if (playerInvincible == false) {

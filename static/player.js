@@ -373,3 +373,50 @@ function swordBehavior() {
 
     swordMovement()
 }
+
+function shootLaser() {
+	if (mouseIsPressed && playerAlive) {
+		laserMilliChecker = millis() - laserLastShot;
+		if (laserMilliChecker > 500) {
+			let laser = new lasers.Sprite(0, 0, 2000,10, "none");
+			laser.rotation = player.angleTo(mouse);
+			laser.x = (laser.width*1/2)*cos(player.angleTo(mouse)) + player.x;
+			laser.y = (laser.width*1/2)*sin(player.angleTo(mouse)) + player.y;
+			laser.color = 255;
+			laser.stroke = 255;
+			// ball.direction = ball.angleTo(mouse);
+			// ball.speed = shotSpeed;
+			laserLastShot = millis()
+		}
+
+	}
+	if (lasers.length > 0) {
+		for (b = 0; b < lasers.length; b ++) {
+			if(lasers.overlaps(enemy)) {
+				
+				enemyHealth -= 5;
+				enemyHealthBar.width -= 24;
+				enemyHealthBar.x -= 12;
+				print(enemyHealth);
+			}
+
+
+		}
+	}
+	//millis()-laserLastShot > 100 && 
+	if(lasers.length> 0)
+		{
+			for(x=0;x<lasers.length; x++)
+				{
+					// lasers[x].remove();
+					lasers[x].height -=1;
+					print(lasers[x].height)
+					if (lasers[x].height <0 || lasers[x].height > 10)
+						{
+							lasers[x].remove();
+						}
+				
+				}
+		}
+}
+
