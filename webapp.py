@@ -10,7 +10,8 @@ import os
 import time
 import pymongo
 import sys
- 
+from operator import itemgetter
+
 app = Flask(__name__)
 
 app.debug = False #Change this to False for production
@@ -55,7 +56,12 @@ def inject_logged_in():
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    if 'user_data' in session:
+        user_data_pprint = pprint.pformat(session['user_data'])#format the user data nicely
+    else:
+        user_data_pprint = '';
+    return render_template('home.html',data=user_data_pprint)    
+    
 
 #redirect to GitHub's OAuth page and confirm callback URL
 @app.route('/login')
@@ -93,11 +99,12 @@ def renderPage1():
         user_data_pprint = pprint.pformat(session['user_data'])#format the user data nicely
     else:
         user_data_pprint = ''
-    return render_template('page1.html',dump_user_data=user_data_pprint, thing = o)
+    return render_template('page1.html',dump_user_data=user_data_pprint, list = o)
 
 
 @app.route('/page2')
 def renderPage2():
+
     return render_template('page2.html')
 
 #the tokengetter is automatically called to check who is logged in.
@@ -121,11 +128,22 @@ def database():
         print(e)
     for doc in collection.find():
         print(doc)
-    o = 0
+    o = []
     for doc in collection.find():
-        o += 1
-    return o
+        o.append(doc)
+    newlist = sorted(o, key=itemgetter("top_score"), reverse=True)
+    x=0
+    newestList = [{"username":newlist[x]["username"], "topscore":newlist[x]["top_score"]}]
+    x=1
+    while x<len(newlist):
+        newestList.append({"username":newlist[x]["username"], "topscore":newlist[x]["top_score"]})
+        x+=1
+        
+    return newestList
     
     
 if __name__ == '__main__':
     app.run()
+def addScore(playerName, score):
+    doc = {"name":playerName, "score":score}
+    collection.insert_one(doc)
