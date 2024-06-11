@@ -104,6 +104,7 @@ function enemyBehavior() {
 				enemyHealthBar.x -= 12*3;
 					enemyShots[e].remove();
 						print(enemyHealth);
+						shotsHit+=1;
 			
 			}
 			

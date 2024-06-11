@@ -1,11 +1,30 @@
 
 lengthIncrease = 500;
+scoreSender = false;
 //changes to shootBall an
 function crosshair() {
 	line(mouseX - 10, mouseY - 10, mouseX + 10, mouseY + 10);
 	line(mouseX - 10, mouseY + 10, mouseX + 10, mouseY - 10);
 }
-
+function scores()
+{
+	if (playerAlive == false && scoreSender == false)
+		{
+	score = (shotsShot/shotsHit)*shotsShot;
+	sendData();
+	scoreSender = true;
+	print("data SENT!")
+		}
+	if (playerAlive == true && scoreSender == true)
+		{
+			scoreSender = false
+			print("data not sent yet")
+		}
+	else
+	{
+		print('error')
+	}
+}
 function shootBall() {
 	if (mouseIsPressed && playerAlive) {
 		milliChecker = millis() - lastShot;
@@ -16,6 +35,7 @@ function shootBall() {
 			ball.direction = ball.angleTo(mouse);
 			ball.speed = shotSpeed;
 			lastShot = millis()
+			shotsShot +=1;
 		}
 	}
 
@@ -55,6 +75,7 @@ function shootBall() {
 				enemyHealth -= 1;
 				enemyHealthBar.width -= 24;
 				enemyHealthBar.x -= 12;
+				shotsHit +=1;
 			}
 
 			else if(balls[b].overlaps(floor) || balls[b].overlaps(roof) || balls[b].overlaps(leftwall) || balls[b].overlaps(rightwall)) {
@@ -351,6 +372,7 @@ function swordBehavior() {
 	if (enemy.overlaps(swordHitBox)) {
 		enemyHealth -= 5;
 		print(enemyHealth);
+		shotsHit +=1;
 	}
 	
 	if(millis() - swingTime > 280) {
@@ -387,6 +409,7 @@ function shootLaser() {
 			// ball.direction = ball.angleTo(mouse);
 			// ball.speed = shotSpeed;
 			laserLastShot = millis()
+			shotsShot+=1;
 		}
 
 	}
@@ -398,6 +421,7 @@ function shootLaser() {
 				enemyHealthBar.width -= 24;
 				enemyHealthBar.x -= 12;
 				print(enemyHealth);
+				shotsHit +=1;
 			}
 
 

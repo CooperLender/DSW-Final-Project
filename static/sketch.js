@@ -1,9 +1,11 @@
-let enemy, player, floor, roof, leftwall, rightwall, balls, enemyShots, speedUp,sizeUp,timeUp,timeStop,guardian,guardianPowerUp,guardianCount, walls, sword,swinger, swordHitBox, ballPowerUps, swordPowerUps,lasers;
+let enemy, player, floor, roof, leftwall, rightwall, balls, enemyShots, speedUp,sizeUp,timeUp,timeStop,guardian,guardianPowerUp,guardianCount, walls, sword,swinger, swordHitBox, ballPowerUps, swordPowerUps,lasers, shotsShot, shotsHit;
 
 let gameLoop = false;
 
 let playerInvincible = false;
 
+shotsShot = 0;
+shotsHit = 0;
 scoreMillis = 0;
 newGameMillis = 0;
 userAccel = 0.1;
@@ -50,7 +52,32 @@ swingerAngle = 0;
 swingTime = 0;
 
 weapon = "balls";
-
+function sendData()
+{
+	$.post("/scoresave",
+	{
+		"score" : score
+	});
+}
+function scores()
+{
+	if (playerAlive == false && scoreSender == false)
+		{
+	score = ((shotsShot+1)/(shotsHit+1))*shotsShot;
+	sendData();
+	scoreSender = true;
+	print("data SENT!")
+		}
+	if (playerAlive == true && scoreSender == true)
+		{
+			scoreSender = false
+			print("data not sent yet")
+		}
+	else
+	{
+		// print('error')
+	}
+}
 function setup() {
 	createCanvas(windowWidth, windowHeight);
 	background(40);
@@ -108,6 +135,7 @@ function setup() {
 }
 
 function restart() {
+	
 	userAccel = 0.5;
 	drag = 0.2;
 	totalMillis = 0;
@@ -143,6 +171,7 @@ function restart() {
 	stopInterval = 2000;
 	swingerAngle = 0;
 	swingTime = 0;
+	scoreSender = false;
 
 	weapon = "laser";
 		if(swordHitBox)
@@ -202,15 +231,19 @@ function restart() {
 }
 
 function draw() {
+	
 	if (gameLoop === false) {
 	
 		menu();
+		scores();
+		
 	}
 	
 	if (gameLoop === true) {
 		cursor(CROSS);
 		
 		dash();
+		scores();
 		shotSpeedUp();
 		shotTimeDown();
 		shotSizeUp();
@@ -244,3 +277,5 @@ function draw() {
 		clear();
 	}
 }
+
+

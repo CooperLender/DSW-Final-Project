@@ -120,7 +120,7 @@ def database():
     
     client = pymongo.MongoClient(connection_string)
     db = client[db_name]
-    collection = db['users'] #1. put the name of your collection in the quotes
+    collection = db['posts'] #1. put the name of your collection in the quotes
     
     # Send a ping to confirm a successful connection
     try:
@@ -133,23 +133,26 @@ def database():
     o = []
     for doc in collection.find():
         o.append(doc)
-    newlist = sorted(o, key=itemgetter("top_score"), reverse=True)
+    newlist = sorted(o, key=itemgetter("score"), reverse=True)
     x=0
-    newestList = [{"username":newlist[x]["username"], "topscore":newlist[x]["top_score"]}]
+    newestList = [{"username":newlist[x]["name"], "topscore":newlist[x]["score"]}]
     x=1
     while x<len(newlist):
-        newestList.append({"username":newlist[x]["username"], "topscore":newlist[x]["top_score"]})
+        newestList.append({"username":newlist[x]["name"], "topscore":newlist[x]["score"]})
         x+=1
         
     return newestList
-def addScore(playerName, score):
+@app.route('/scoresave', methods = ["POST"])
+def addScore():
+    score = int(request.values["score"])
     r = "None"
     if 'user_data' in session:
         r = session['user_data']['login']
     else:
         user_data_pprint = ''   
-    doc = {"name":playerName, "score":score}
+    doc = {"name":r, "score":score}
     collection.insert_one(doc)
+    return ""
 
     
 if __name__ == '__main__':
