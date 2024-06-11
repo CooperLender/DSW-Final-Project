@@ -4,6 +4,8 @@ let gameLoop = false;
 
 let playerInvincible = false;
 
+scoreMillis = 0;
+newGameMillis = 0;
 userAccel = 0.1;
 drag = 1;
 totalMillis = 0;
@@ -109,6 +111,7 @@ function restart() {
 	userAccel = 0.5;
 	drag = 0.2;
 	totalMillis = 0;
+
 	milliChecker = 0;
 	lastShot = 0;
 	baseSpeed = 1;

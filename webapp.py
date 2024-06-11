@@ -95,11 +95,13 @@ def authorized():
 @app.route('/page1')
 def renderPage1():
     o =database()
+    r = "None"
     if 'user_data' in session:
         user_data_pprint = pprint.pformat(session['user_data'])#format the user data nicely
+        r = session['user_data']['login']
     else:
         user_data_pprint = ''
-    return render_template('page1.html',dump_user_data=user_data_pprint, list = o)
+    return render_template('page1.html',dump_user_data=user_data_pprint, list = o, name = r)
 
 
 @app.route('/page2')
@@ -140,10 +142,15 @@ def database():
         x+=1
         
     return newestList
-    
+def addScore(playerName, score):
+    r = "None"
+    if 'user_data' in session:
+        r = session['user_data']['login']
+    else:
+        user_data_pprint = ''   
+    doc = {"name":playerName, "score":score}
+    collection.insert_one(doc)
+
     
 if __name__ == '__main__':
     app.run()
-def addScore(playerName, score):
-    doc = {"name":playerName, "score":score}
-    collection.insert_one(doc)
