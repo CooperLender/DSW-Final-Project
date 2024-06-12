@@ -1,33 +1,65 @@
 deflectedShotDamage = 20;
+
+function enemySpawn() {
+	enemyMilliChecker = 0;
+	enemyMilliCheckerHealth = 0;
+	enemyMilliCheckerBurst = 0;
+	enemyMilliCheckerSpread = 0;
+	enemyMilliCheckerWing = 0;
+	enemyAlive = true;
+	enemyShotSize = windowWidth/50;
+	enemyShotSpeed = windowWidth/120;
+	lastEnemyShot = millis();
+	lastEnemyHealthShot = millis();
+	lastEnemyBurstShot = millis();
+	lastEnemySpreadShot = millis();
+	lastEnemyWingShot = millis();
+	lastEnemySpawnFlash = millis();
+	
+	enemyCanSpawn = false;
+	
+	maxEnemyHealth = 100;
+	maxHealthBarWidth = windowWidth - 240;
+
+	enemyHealth = maxEnemyHealth;
+	enemyHealthBarWidth = maxHealthBarWidth;
+	
+	leftSide = random(100,windowWidth/4);
+	rightSide = random(windowWidth/2 + 200, windowWidth- 100);
+	spawnLocations = [];
+
+	spawnLocations.push(leftSide);
+	spawnLocations.push(rightSide);
+
+	spawnLocation = random(spawnLocations);
+	
+	enemy = new Sprite(spawnLocation,random(100,windowHeight-100),windowWidth/14, windowWidth/14, "k");
+	enemy.color = 40;
+	enemy.stroke = color(150, 0);
+	enemy.strokeWeight = 2;
+	
+	lastEnemySpawn = millis();
+	lastColor = "dark";
+}
+
 function enemyBehavior() {
 	if (enemyAlive) {
 		
 		if (enemyHealth <= 0) {
-			enemy.remove();
-			
-			enemyShots.removeAll();
-			enemyHealthShots.removeAll();
-			enemyHealthBar.remove();
-			
 			enemyAlive = false;
-			if(weapon == 'sword')
-				{
-
-					
-					
-					swordPowerUps[0].x = 200;
-					
-				}
-			if(weapon == 'balls')
-				{
-					m=0;
-					r= Math.random()*(ballPowerUps.length-1);
-					r = Math.round(r);
-					ballPowerUps[r].x =200;
-				}
+			
+			if(weapon == 'sword') {
+				swordPowerUps[0].x = 200;	
+			}
+			if(weapon == 'balls') {
+				m=0;
+				r= Math.random()*(ballPowerUps.length-1);
+				r = Math.round(r);
+				ballPowerUps[r].x =200;
+			}
 		}
 		
-		enemy.rotateTowards(player, 1, 0);
+		enemy.rotateTowards(player, 0.8, 0);
 
 		enemy.direction = enemy.angleTo(player);
 		enemy.speed = 3;
@@ -35,7 +67,8 @@ function enemyBehavior() {
 		enemyMilliChecker = millis() - lastEnemyShot;
 		enemyMilliCheckerHealth = millis() - lastEnemyHealthShot;
 		enemyMilliCheckerBurst = millis()  - lastEnemyBurstShot;
-		enemyMilliCheckerSnipe = millis() - lastEnemySnipeShot;
+		enemyMilliCheckerSpread = millis() - lastEnemySpreadShot;
+		enemyMilliCheckerWing = millis() - lastEnemyWingShot;
 
 		if (enemyMilliChecker > enemyRPM) {
 			let enemyShot = new enemyShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
@@ -44,29 +77,56 @@ function enemyBehavior() {
 			lastEnemyShot = millis();
 		}
 		
-		if (enemyMilliCheckerBurst > 2600) {
-			for(numBurst = 0; numBurst < 5; numBurst ++) {
+		if (enemyMilliCheckerBurst > 2000 && enemyHealth <= maxEnemyHealth*0.9) {
+			let enemyShot = new enemyShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
+			enemyShot.direction = enemyShot.angleTo(player);
+			enemyShot.speed = enemyShotSpeed-2;
+			
+			for(numBurst = 0; numBurst <= 3; numBurst ++) {
 				let enemyShot = new enemyShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
-				enemyShot.direction = enemyShot.angleTo(player) +10*numBurst -20;
-				enemyShot.speed = enemyShotSpeed-1;
+				enemyShot.direction = enemyShot.angleTo(player) + (45/3) * numBurst;
+				enemyShot.speed = enemyShotSpeed-2;
+				lastEnemyBurstShot = millis();
+			}
+			for(numBurst = 0; numBurst <= 3; numBurst ++) {
+				let enemyShot = new enemyShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
+				enemyShot.direction = enemyShot.angleTo(player) - (45/3) * numBurst;
+				enemyShot.speed = enemyShotSpeed-2;
 				lastEnemyBurstShot = millis();
 			}
 		}
 		
-		if (enemyMilliCheckerSnipe > 5000 && player.vel.x == 0 && player.vel.y == 0) {
-			let enemyShot = new enemyShots.Sprite(enemy.x, enemy.y, enemyShotSize/2, "none");
-			enemyShot.direction = enemyShot.angleTo(player);
-			enemyShot.speed = enemyShotSpeed + 10;
-			lastEnemySnipeShot = millis();
+		if (enemyMilliCheckerHealth > 3000 && enemyHealth <= maxEnemyHealth*0.25) {
+			healthShotSpeed = random(4, 11);
+			for(s = 0; s < 15; s ++) {
+				let enemyHealthShot = new enemyHealthShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
+				enemyHealthShot.direction = enemyHealthShot.angleTo(player) + (360/15) * s
+				enemyHealthShot.speed = random(4, 11);
+				lastEnemyHealthShot = millis();
+			}
 		}
 		
-		if (enemyMilliCheckerHealth > 3000 && enemyHealth <= 40) {
-			healthShotSpeed = random(4, 11);
-			for(s = 0; s < 50; s ++) {
-				let enemyHealthShot = new enemyHealthShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
-				enemyHealthShot.direction = enemyHealthShot.angleTo(player) +10*s - 80;
-				enemyHealthShot.speed = healthShotSpeed;
-				lastEnemyHealthShot = millis();
+		if (enemyMilliCheckerSpread > 3000 && enemyHealth <= maxEnemyHealth*0.4) {
+			for(s = 0; s < numSpreadShots; s ++) {
+				let enemyShot = new enemyShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
+				enemyShot.direction = enemyShot.angleTo(player) + (360/numSpreadShots) * s
+				enemyShot.speed = 5;
+				lastEnemySpreadShot = millis();
+			}
+		}
+		
+		if (enemyMilliCheckerWing > 2500 && enemyHealth <= maxEnemyHealth/2) {
+			for(s = 0; s < 3; s ++) {
+				let enemyShot = new enemyShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
+				enemyShot.direction = enemyShot.angleTo(player) + 90
+				enemyShot.speed = 5 + (s*1.1);
+				lastEnemyWingShot = millis();
+			}
+			for(s = 0; s < 3; s ++) {
+				let enemyShot = new enemyShots.Sprite(enemy.x, enemy.y, enemyShotSize, "none");
+				enemyShot.direction = enemyShot.angleTo(player) - 90
+				enemyShot.speed = 5 + (s*1.2);
+				lastEnemyWingShot = millis();
 			}
 		}
 
@@ -74,40 +134,31 @@ function enemyBehavior() {
 			for (e = 0; e < enemyShots.length; e ++) {
 				if(enemyShots[e].overlaps(player)) {
 					if (playerInvincible == false) {
-						player.remove();
-						enemy.remove();
-						
-						enemyShots.removeAll();
-						enemyHealthShots.removeAll();
-						balls.removeAll();
-						
-						enemyHealthBar.remove();	
-
 						enemyAlive = false;
 						playerAlive = false;
 						gameLoop = false;
 					}
 				}
-
-				else if(enemyShots[e].overlaps(floor) || enemyShots[e].overlaps(roof) || enemyShots[e].overlaps(leftwall) || enemyShots[e].overlaps(rightwall) || enemyShots[e].overlaps(guardians) ) {
-					enemyShots[e].remove();
-				}
+				
 				else if(enemyShots[e].overlaps(swordHitBox)){
 					enemyShots[e].direction = enemyShots[e].angleTo(mouse);
 					enemyShots[e].speed = shotSpeed;
 					enemyShots[e].stroke = 255;
 					enemyShots[e].name = 'a';
 				}
+				
 				else if(enemyShots[e].overlaps(enemy) && enemyShots[e].name == 'a' ){
 					enemyHealth -= deflectedShotDamage;
 					enemyHealthBar.width -= 24*3;
-				enemyHealthBar.x -= 12*3;
+					enemyHealthBar.x -= 12*3;
 					enemyShots[e].remove();
-						print(enemyHealth);
-						shotsHit+=1;
-			
-			}
-			
+					print(enemyHealth);
+					shotsHit+=1;
+				}
+
+				else if(enemyShots[e].overlaps(guardians) || enemyShots[e].overlaps(floor) || enemyShots[e].overlaps(roof) || enemyShots[e].overlaps(leftwall) || enemyShots[e].overlaps(rightwall)) {
+					enemyShots[e].remove();
+				}
 			}
 		}
 		
@@ -116,57 +167,41 @@ function enemyBehavior() {
 				if(enemyHealthShots[e].overlaps(player) && enemyHealth <= 50) {
 					enemyHealthShots[e].remove();
 					enemyHealth += 5;
-					enemyHealthBar.width += 120;
-					enemyHealthBar.x += 60;
 				}
-
-				else if(enemyHealthShots[e].overlaps(floor) || enemyHealthShots[e].overlaps(roof) || enemyHealthShots[e].overlaps(leftwall) || enemyHealthShots[e].overlaps(rightwall)|| enemyHealthShots[e].overlaps(guardians) ) {
-					enemyHealthShots[e].remove();
-				}
-					else if(enemyHealthShots[e].overlaps(swordHitBox)){
+				
+				else if(enemyHealthShots[e].overlaps(swordHitBox)){
 					enemyHealthShots[e].direction = enemyHealthShots[e].angleTo(mouse);
 					enemyHealthShots[e].speed = shotSpeed;
 					enemyHealthShots[e].stroke = 255;
 					enemyHealthShots[e].name = 'a';
 				}
+				
 				else if(enemyHealthShots[e].overlaps(enemy) && enemyHealthShots[e].name == 'a' ){
-						enemyHealth -= deflectedShotDamage;
-					enemyHealthBar.width -= 24*3;
-				enemyHealthBar.x -= 12*3;
+					enemyHealth -= deflectedShotDamage;
 					enemyHealthShots[e].remove();
-						
-			
-			}
+				}
+
+				else if(enemyHealthShots[e].overlaps(guardians) || enemyHealthShots[e].overlaps(floor) || enemyHealthShots[e].overlaps(roof) || enemyHealthShots[e].overlaps(leftwall) || enemyHealthShots[e].overlaps(rightwall)) {
+					enemyHealthShots[e].remove();
+				}
 			}
 		}
 		
-		if (enemyHealth >= 50) {
-			enemyHealth = 50;
-			enemyHealthBar.width = maxHealthBarWidth;
-			enemyHealthBar.x = windowWidth/2;
+		if (enemyHealth >= maxEnemyHealth) {
+			enemyHealth = maxEnemyHealth;
 		}
-		else
-			{
-				enemyHealthBar.width = enemyHealthBarWidth/(50/enemyHealth);
-				enemyHealthBar.x = 180;
-			}
 		
 		if (player.overlaps(enemy)) {
 			if (playerInvincible == false) {
-				player.remove();
-				enemy.remove();
-				
-				enemyShots.removeAll();
-				enemyHealthShots.removeAll();
-				balls.removeAll();
-				
-				enemyHealthBar.remove();	
-
 				enemyAlive = false;
 				playerAlive = false;
 				gameLoop = false;
 			}
 		}
 	}
+}
 
+function checkBossHealth() {
+	enemyHealthBar.width = (enemyHealth/maxEnemyHealth) * maxHealthBarWidth;
+	enemyHealthBar.x = 120 + (enemyHealthBar.width/2);
 }
